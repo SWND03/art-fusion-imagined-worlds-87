@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -16,6 +15,7 @@ import {
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 import { processImages, ProcessingOptions, base64ToBlob } from "@/utils/imageProcessing";
+import { useSavedImages } from "@/hooks/useSavedImages";
 
 const Create = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -28,6 +28,7 @@ const Create = () => {
   const [detailLevel, setDetailLevel] = useState(80);
   const [preserveLighting, setPreserveLighting] = useState(true);
   const [addShadows, setAddShadows] = useState(true);
+  const { saveImage } = useSavedImages();
 
   const styles = [
     { id: "realistic", name: "Realistic" },
@@ -102,8 +103,8 @@ const Create = () => {
 
   const handleSave = () => {
     if (resultImage) {
+      const id = saveImage(resultImage);
       toast.success("Image saved to your gallery!");
-      // Here you would typically save to a database if connected to backend
     }
   };
 
@@ -111,18 +112,20 @@ const Create = () => {
     if (!resultImage) return;
     
     const link = document.createElement('a');
-    link.href = resultImage;
-    link.download = 'imaginary-art-fusion.png';
+    const blob = base64ToBlob(resultImage);
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `imaginary-art-fusion-${Date.now()}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
     toast.success("Image downloaded successfully!");
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
       <nav className="bg-white border-b border-gray-200 py-4 px-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -140,16 +143,13 @@ const Create = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-8 text-center">Create Your Fusion Artwork</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Panel - Inputs */}
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h2 className="text-xl font-semibold mb-6">Upload Images</h2>
             
-            {/* Background Image Upload */}
             <div className="mb-6">
               <p className="text-sm text-gray-600 mb-2">Background Image</p>
               <div 
@@ -185,7 +185,6 @@ const Create = () => {
               </div>
             </div>
             
-            {/* Person Image Upload */}
             <div className="mb-6">
               <p className="text-sm text-gray-600 mb-2">Person Image</p>
               <div 
@@ -221,7 +220,6 @@ const Create = () => {
               </div>
             </div>
             
-            {/* Instructions */}
             <div className="mb-6">
               <p className="text-sm text-gray-600 mb-2">Instructions</p>
               <textarea
@@ -234,11 +232,9 @@ const Create = () => {
             </div>
           </div>
           
-          {/* Middle Panel - Styles */}
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h2 className="text-xl font-semibold mb-6">Style Options</h2>
             
-            {/* Style Selection */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               {styles.map((style) => (
                 <div 
@@ -257,7 +253,6 @@ const Create = () => {
               ))}
             </div>
             
-            {/* Advanced Options */}
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-4">Advanced Options</h3>
               
@@ -306,7 +301,6 @@ const Create = () => {
               </div>
             </div>
             
-            {/* Generate Button */}
             <Button 
               className="w-full bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
               onClick={handleGenerate}
@@ -326,7 +320,6 @@ const Create = () => {
             </Button>
           </div>
           
-          {/* Right Panel - Result */}
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h2 className="text-xl font-semibold mb-6">Result</h2>
             

@@ -1,4 +1,3 @@
-
 // This file handles image processing and AI integration
 
 export interface ProcessingOptions {
@@ -88,17 +87,101 @@ export const processImages = async (
       const generatedImageData = data.candidates[0].content.parts[0].inline_data.data;
       return `data:image/jpeg;base64,${generatedImageData}`;
     } else {
-      // If no image is generated, for development/fallback purposes, 
-      // we can return a composite of the two images
-      console.warn("No image generated from API, using fallback");
-      return await createFallbackComposite(backgroundImage, personImage);
+      console.warn("No image generated from API, using advanced fallback");
+      return await createAdvancedComposite(backgroundImage, personImage, options);
     }
   } catch (error) {
     console.error("Error in image processing:", error);
-    
-    // Fallback to a simple composite for development/testing
-    return await createFallbackComposite(backgroundImage, personImage);
+    return await createAdvancedComposite(backgroundImage, personImage, options);
   }
+};
+
+// Advanced fallback function to create a composite of the two images
+const createAdvancedComposite = async (
+  backgroundImage: string, 
+  personImage: string, 
+  options: ProcessingOptions
+): Promise<string> => {
+  return new Promise((resolve) => {
+    const bgImg = new Image();
+    const personImg = new Image();
+    
+    bgImg.onload = () => {
+      personImg.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          resolve(backgroundImage);
+          return;
+        }
+        
+        // Set canvas dimensions to background image size
+        canvas.width = bgImg.width;
+        canvas.height = bgImg.height;
+        
+        // Draw background with adjustments based on style
+        ctx.drawImage(bgImg, 0, 0);
+        
+        // Apply style effects to background
+        if (options.style === 'surreal') {
+          ctx.filter = 'saturate(150%) hue-rotate(30deg)';
+        } else if (options.style === 'cartoon') {
+          ctx.filter = 'contrast(150%) brightness(120%)';
+        } else if (options.style === 'watercolor') {
+          ctx.filter = 'blur(1px) brightness(105%)';
+        } else if (options.style === 'cyberpunk') {
+          ctx.filter = 'saturate(200%) contrast(130%) brightness(120%)';
+        } else if (options.style === 'fantasy') {
+          ctx.filter = 'sepia(50%) saturate(150%)';
+        }
+        
+        // Calculate person image dimensions and position
+        const scaleFactor = (options.integrationStrength / 100) * 0.8 + 0.2; // Scale between 20% and 100%
+        const personWidth = personImg.width * scaleFactor;
+        const personHeight = personImg.height * scaleFactor;
+        
+        // Position the person based on detail level (affects positioning randomness)
+        const randomOffset = (options.detailLevel / 100) * 100; // Max 100px random offset
+        const xPos = canvas.width / 2 - personWidth / 2 + (Math.random() - 0.5) * randomOffset;
+        const yPos = (canvas.height - personHeight) / 2 + (Math.random() - 0.5) * randomOffset;
+        
+        // Reset filter for person image
+        ctx.filter = 'none';
+        
+        // Draw person with shadow if enabled
+        if (options.addShadows) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 20;
+          ctx.shadowOffsetX = 10;
+          ctx.shadowOffsetY = 10;
+        }
+        
+        // Draw person image with lighting preservation if enabled
+        if (options.preserveLighting) {
+          ctx.globalCompositeOperation = 'multiply';
+        }
+        
+        ctx.drawImage(personImg, xPos, yPos, personWidth, personHeight);
+        
+        // Reset composite operation
+        ctx.globalCompositeOperation = 'source-over';
+        
+        // Add custom effects based on instructions
+        if (options.instructions.toLowerCase().includes('dramatic')) {
+          ctx.filter = 'contrast(120%) brightness(90%)';
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Return the composite image
+        resolve(canvas.toDataURL('image/jpeg', 0.9));
+      };
+      personImg.src = personImage;
+    };
+    bgImg.src = backgroundImage;
+  });
 };
 
 // Simple fallback function to create a composite of the two images
