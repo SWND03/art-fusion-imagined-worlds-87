@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
+import { processImages, ProcessingOptions, base64ToBlob } from "@/utils/imageProcessing";
 
 const Create = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -23,6 +24,10 @@ const Create = () => {
   const [selectedStyle, setSelectedStyle] = useState("realistic");
   const [isGenerating, setIsGenerating] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
+  const [integrationStrength, setIntegrationStrength] = useState(70);
+  const [detailLevel, setDetailLevel] = useState(80);
+  const [preserveLighting, setPreserveLighting] = useState(true);
+  const [addShadows, setAddShadows] = useState(true);
 
   const styles = [
     { id: "realistic", name: "Realistic" },
@@ -57,21 +62,49 @@ const Create = () => {
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!backgroundImage || !personImage) {
       toast.error("Please upload both a background image and a person image");
       return;
     }
 
     setIsGenerating(true);
+    toast.info("Generating your fusion artwork...", { duration: 2000 });
     
-    // Simulating AI processing time
-    setTimeout(() => {
-      // For demo purposes, we'll just use the background image as the result
-      setResultImage(backgroundImage);
-      setIsGenerating(false);
+    try {
+      // Set up processing options
+      const options: ProcessingOptions = {
+        style: selectedStyle,
+        integrationStrength,
+        detailLevel,
+        preserveLighting,
+        addShadows,
+        instructions
+      };
+      
+      // Call the API to process images
+      const result = await processImages(backgroundImage, personImage, options);
+      setResultImage(result);
       toast.success("Your fusion artwork has been created!");
-    }, 3000);
+    } catch (error) {
+      console.error("Error generating image:", error);
+      toast.error("Failed to generate image. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleRegenerate = () => {
+    if (backgroundImage && personImage) {
+      handleGenerate();
+    }
+  };
+
+  const handleSave = () => {
+    if (resultImage) {
+      toast.success("Image saved to your gallery!");
+      // Here you would typically save to a database if connected to backend
+    }
   };
 
   const handleDownload = () => {
@@ -232,27 +265,43 @@ const Create = () => {
                 <div>
                   <div className="flex justify-between mb-2">
                     <p className="text-sm text-gray-600">Integration Strength</p>
-                    <p className="text-sm text-gray-600">70%</p>
+                    <p className="text-sm text-gray-600">{integrationStrength}%</p>
                   </div>
-                  <Slider defaultValue={[70]} max={100} step={1} />
+                  <Slider 
+                    value={[integrationStrength]} 
+                    onValueChange={(values) => setIntegrationStrength(values[0])} 
+                    max={100} 
+                    step={1} 
+                  />
                 </div>
                 
                 <div>
                   <div className="flex justify-between mb-2">
                     <p className="text-sm text-gray-600">Detail Level</p>
-                    <p className="text-sm text-gray-600">80%</p>
+                    <p className="text-sm text-gray-600">{detailLevel}%</p>
                   </div>
-                  <Slider defaultValue={[80]} max={100} step={1} />
+                  <Slider 
+                    value={[detailLevel]} 
+                    onValueChange={(values) => setDetailLevel(values[0])} 
+                    max={100} 
+                    step={1} 
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">Preserve Lighting</p>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={preserveLighting}
+                    onCheckedChange={setPreserveLighting} 
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">Add Shadows</p>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={addShadows}
+                    onCheckedChange={setAddShadows} 
+                  />
                 </div>
               </div>
             </div>
@@ -298,11 +347,11 @@ const Create = () => {
             
             {resultImage && (
               <div className="flex gap-3">
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1" onClick={handleRegenerate}>
                   <Redo className="mr-2 h-4 w-4" />
                   Regenerate
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button variant="outline" className="flex-1" onClick={handleSave}>
                   <Save className="mr-2 h-4 w-4" />
                   Save
                 </Button>
