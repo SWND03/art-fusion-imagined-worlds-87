@@ -91,18 +91,18 @@ export const processImages = async (
       // If no image is generated, for development/fallback purposes, 
       // we can return a composite of the two images
       console.warn("No image generated from API, using fallback");
-      return createFallbackComposite(backgroundImage, personImage);
+      return await createFallbackComposite(backgroundImage, personImage);
     }
   } catch (error) {
     console.error("Error in image processing:", error);
     
     // Fallback to a simple composite for development/testing
-    return createFallbackComposite(backgroundImage, personImage);
+    return await createFallbackComposite(backgroundImage, personImage);
   }
 };
 
 // Simple fallback function to create a composite of the two images
-const createFallbackComposite = (backgroundImage: string, personImage: string): string => {
+const createFallbackComposite = async (backgroundImage: string, personImage: string): Promise<string> => {
   return new Promise((resolve) => {
     const bgImg = new Image();
     const personImg = new Image();
