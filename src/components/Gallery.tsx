@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Link } from "react-router-dom";
 
 const Gallery = () => {
   const galleryImages = [
@@ -119,13 +119,15 @@ const Gallery = () => {
       </div>
       
       <div className="text-center mt-12">
-        <Button 
-          variant="outline" 
-          size="lg"
-          className="hover:bg-purple-500 hover:text-white transition-colors"
-        >
-          View More Examples
-        </Button>
+        <Link to="/gallery">
+          <Button 
+            variant="outline" 
+            size="lg"
+            className="hover:bg-purple-500 hover:text-white transition-colors"
+          >
+            View Full Gallery
+          </Button>
+        </Link>
       </div>
     </section>
   );
