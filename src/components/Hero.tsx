@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, GalleryHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
@@ -22,9 +22,12 @@ const Hero = () => {
               Start Creating
             </Button>
           </Link>
-          <Button variant="outline" size="lg">
-            View Gallery
-          </Button>
+          <Link to="/gallery">
+            <Button variant="outline" size="lg" className="gap-2">
+              <GalleryHorizontal className="h-5 w-5" />
+              View Gallery
+            </Button>
+          </Link>
         </div>
       </div>
       <div className="mt-16 max-w-5xl">
