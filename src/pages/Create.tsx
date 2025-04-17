@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -10,12 +11,14 @@ import {
   Sparkles,
   Wand2,
   Redo,
-  Save
+  Save,
+  Info
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { processImages, ProcessingOptions, base64ToBlob } from "@/utils/imageProcessing";
 import { useSavedImages } from "@/hooks/useSavedImages";
+import { Progress } from "@/components/ui/progress";
 
 const Create = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -28,6 +31,7 @@ const Create = () => {
   const [detailLevel, setDetailLevel] = useState(80);
   const [preserveLighting, setPreserveLighting] = useState(true);
   const [addShadows, setAddShadows] = useState(true);
+  const [generationProgress, setGenerationProgress] = useState(0);
   const { saveImage } = useSavedImages();
 
   const styles = [
@@ -45,6 +49,7 @@ const Create = () => {
       fileReader.onload = (e) => {
         if (e.target?.result) {
           setBackgroundImage(e.target.result as string);
+          toast.success("Background image uploaded successfully!");
         }
       };
       fileReader.readAsDataURL(e.target.files[0]);
@@ -57,6 +62,7 @@ const Create = () => {
       fileReader.onload = (e) => {
         if (e.target?.result) {
           setPersonImage(e.target.result as string);
+          toast.success("Person image uploaded successfully!");
         }
       };
       fileReader.readAsDataURL(e.target.files[0]);
@@ -70,7 +76,19 @@ const Create = () => {
     }
 
     setIsGenerating(true);
+    setGenerationProgress(0);
     toast.info("Generating your fusion artwork...", { duration: 2000 });
+    
+    // Simulate progress
+    const progressInterval = setInterval(() => {
+      setGenerationProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return prev;
+        }
+        return prev + 10;
+      });
+    }, 300);
     
     try {
       // Set up processing options
@@ -83,14 +101,17 @@ const Create = () => {
         instructions
       };
       
-      // Call the API to process images
+      // Call the function to process images
       const result = await processImages(backgroundImage, personImage, options);
       setResultImage(result);
+      setGenerationProgress(100);
+      
       toast.success("Your fusion artwork has been created!");
     } catch (error) {
       console.error("Error generating image:", error);
       toast.error("Failed to generate image. Please try again.");
     } finally {
+      clearInterval(progressInterval);
       setIsGenerating(false);
     }
   };
@@ -221,7 +242,12 @@ const Create = () => {
             </div>
             
             <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-2">Instructions</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">Placement Instructions</p>
+                <div className="tooltip" title="Try using phrases like 'place on the left' or 'center position'">
+                  <Info className="h-4 w-4 text-gray-400" />
+                </div>
+              </div>
               <textarea
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                 rows={3}
@@ -318,6 +344,16 @@ const Create = () => {
                 </>
               )}
             </Button>
+            
+            {isGenerating && (
+              <div className="mt-4">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Processing...</span>
+                  <span>{generationProgress}%</span>
+                </div>
+                <Progress value={generationProgress} className="h-2" />
+              </div>
+            )}
           </div>
           
           <div className="bg-white p-6 rounded-xl shadow-sm">
