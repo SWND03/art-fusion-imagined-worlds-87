@@ -5,8 +5,6 @@ export interface ProcessingOptions {
   style: string;
   integrationStrength: number;
   detailLevel: number;
-  preserveLighting: boolean;
-  addShadows: boolean;
   instructions: string;
 }
 
@@ -71,19 +69,14 @@ const createAdvancedComposite = async (
         ctx.globalCompositeOperation = 'source-over';
         ctx.filter = 'none';
         
-        // Add shadows if enabled
-        if (options.addShadows) {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-          ctx.shadowBlur = 25;
-          ctx.shadowOffsetX = 15;
-          ctx.shadowOffsetY = 15;
-        }
+        // Default shadows
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        ctx.shadowBlur = 25;
+        ctx.shadowOffsetX = 15;
+        ctx.shadowOffsetY = 15;
         
-        // Apply lighting preservation
-        if (options.preserveLighting) {
-          ctx.globalCompositeOperation = 'multiply';
-          ctx.globalAlpha = 0.85;
-        }
+        // Default global alpha
+        ctx.globalAlpha = 0.85;
         
         // Draw the person image
         ctx.drawImage(personImg, xPos, yPos, personWidth, personHeight);

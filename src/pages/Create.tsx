@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { 
   Upload, 
   ImagePlus, 
@@ -29,8 +28,6 @@ const Create = () => {
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [integrationStrength, setIntegrationStrength] = useState(70);
   const [detailLevel, setDetailLevel] = useState(80);
-  const [preserveLighting, setPreserveLighting] = useState(true);
-  const [addShadows, setAddShadows] = useState(true);
   const [generationProgress, setGenerationProgress] = useState(0);
   const { saveImage } = useSavedImages();
 
@@ -96,8 +93,6 @@ const Create = () => {
         style: selectedStyle,
         integrationStrength,
         detailLevel,
-        preserveLighting,
-        addShadows,
         instructions
       };
       
@@ -167,9 +162,9 @@ const Create = () => {
       <main className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-8 text-center">Create Your Fusion Artwork</h1>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">Upload Images</h2>
+            <h2 className="text-xl font-semibold mb-6">Upload & Style</h2>
             
             <div className="mb-6">
               <p className="text-sm text-gray-600 mb-2">Background Image</p>
@@ -243,87 +238,63 @@ const Create = () => {
             
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm text-gray-600">Placement Instructions</p>
-                <div className="tooltip" title="Try using phrases like 'place on the left' or 'center position'">
+                <p className="text-sm text-gray-600">Position Instructions</p>
+                <div className="tooltip" data-tip="Try 'place on the left', 'right side', or 'center'">
                   <Info className="h-4 w-4 text-gray-400" />
                 </div>
               </div>
               <textarea
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-                rows={3}
-                placeholder="E.g., Place the person on the left side of the image, make lighting dramatic..."
+                rows={2}
+                placeholder="E.g., Place the person on the left side..."
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
               ></textarea>
             </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">Style Options</h2>
             
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-3 gap-2 mb-6">
               {styles.map((style) => (
                 <div 
                   key={style.id}
-                  className={`border p-3 rounded-lg cursor-pointer transition-all ${
+                  className={`border p-2 rounded-lg cursor-pointer transition-all ${
                     selectedStyle === style.id 
                       ? 'border-purple-500 bg-purple-50' 
                       : 'border-gray-200 hover:border-purple-300'
                   }`}
                   onClick={() => setSelectedStyle(style.id)}
                 >
-                  <p className={`font-medium ${selectedStyle === style.id ? 'text-purple-600' : 'text-gray-700'}`}>
+                  <p className={`font-medium text-sm text-center ${selectedStyle === style.id ? 'text-purple-600' : 'text-gray-700'}`}>
                     {style.name}
                   </p>
                 </div>
               ))}
             </div>
             
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-4">Advanced Options</h3>
+            <div className="space-y-4 mb-6">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <p className="text-sm text-gray-600">Blend Strength</p>
+                  <p className="text-sm text-gray-600">{integrationStrength}%</p>
+                </div>
+                <Slider 
+                  value={[integrationStrength]} 
+                  onValueChange={(values) => setIntegrationStrength(values[0])} 
+                  max={100} 
+                  step={1} 
+                />
+              </div>
               
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <p className="text-sm text-gray-600">Integration Strength</p>
-                    <p className="text-sm text-gray-600">{integrationStrength}%</p>
-                  </div>
-                  <Slider 
-                    value={[integrationStrength]} 
-                    onValueChange={(values) => setIntegrationStrength(values[0])} 
-                    max={100} 
-                    step={1} 
-                  />
+              <div>
+                <div className="flex justify-between mb-2">
+                  <p className="text-sm text-gray-600">Detail Level</p>
+                  <p className="text-sm text-gray-600">{detailLevel}%</p>
                 </div>
-                
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <p className="text-sm text-gray-600">Detail Level</p>
-                    <p className="text-sm text-gray-600">{detailLevel}%</p>
-                  </div>
-                  <Slider 
-                    value={[detailLevel]} 
-                    onValueChange={(values) => setDetailLevel(values[0])} 
-                    max={100} 
-                    step={1} 
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-600">Preserve Lighting</p>
-                  <Switch 
-                    checked={preserveLighting}
-                    onCheckedChange={setPreserveLighting} 
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-600">Add Shadows</p>
-                  <Switch 
-                    checked={addShadows}
-                    onCheckedChange={setAddShadows} 
-                  />
-                </div>
+                <Slider 
+                  value={[detailLevel]} 
+                  onValueChange={(values) => setDetailLevel(values[0])} 
+                  max={100} 
+                  step={1} 
+                />
               </div>
             </div>
             
@@ -359,7 +330,7 @@ const Create = () => {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h2 className="text-xl font-semibold mb-6">Result</h2>
             
-            <div className="mb-6 border rounded-lg overflow-hidden h-80 flex items-center justify-center bg-gray-100">
+            <div className="mb-6 border rounded-lg overflow-hidden h-96 flex items-center justify-center bg-gray-100">
               {resultImage ? (
                 <img 
                   src={resultImage} 
