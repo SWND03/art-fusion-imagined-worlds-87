@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,9 @@ const GalleryPage = () => {
       return;
     }
 
-    setImages(data);
+    if (data) {
+      setImages(data);
+    }
   };
 
   const handleDownload = async (image: GalleryImage) => {

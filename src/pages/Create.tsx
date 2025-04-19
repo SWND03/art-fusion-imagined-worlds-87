@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -18,6 +17,7 @@ import { toast } from "sonner";
 import { processImages, ProcessingOptions, base64ToBlob } from "@/utils/imageProcessing";
 import { useSavedImages } from "@/hooks/useSavedImages";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
 
 const Create = () => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -117,10 +117,31 @@ const Create = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (resultImage) {
-      const id = saveImage(resultImage);
-      toast.success("Image saved to your gallery!");
+      try {
+        const { data, error } = await supabase
+          .from('gallery_images')
+          .insert([
+            {
+              title: `Fusion Art ${new Date().toLocaleDateString()}`,
+              description: instructions || 'Custom fusion artwork',
+              style: selectedStyle,
+              image_url: resultImage,
+              downloads: 0
+            }
+          ])
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        toast.success('Image saved to your gallery!');
+        saveImage(resultImage); // Save to local storage as well
+      } catch (error) {
+        console.error('Error saving image:', error);
+        toast.error('Failed to save image to gallery');
+      }
     }
   };
 
@@ -167,7 +188,7 @@ const Create = () => {
             <h2 className="text-xl font-semibold mb-6">Upload & Style</h2>
             
             <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-2">Background Image</p>
+              <p className="text-sm text-gray-600 mb-2">Existing Image</p>
               <div 
                 className={`border-2 border-dashed rounded-lg p-4 text-center ${
                   backgroundImage ? 'border-green-300' : 'border-gray-300 hover:border-purple-300'
@@ -178,7 +199,7 @@ const Create = () => {
                   <div className="relative">
                     <img 
                       src={backgroundImage} 
-                      alt="Background" 
+                      alt="Existing" 
                       className="mx-auto max-h-40 rounded"
                     />
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded">
@@ -188,7 +209,7 @@ const Create = () => {
                 ) : (
                   <div className="py-4">
                     <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-gray-500">Click to upload a background image</p>
+                    <p className="text-gray-500">Click to upload an existing image</p>
                   </div>
                 )}
                 <input 
