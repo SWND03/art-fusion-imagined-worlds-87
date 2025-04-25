@@ -188,41 +188,6 @@ const Create = () => {
             <h2 className="text-xl font-semibold mb-6">Upload & Style</h2>
             
             <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-2">Existing Image</p>
-              <div 
-                className={`border-2 border-dashed rounded-lg p-4 text-center ${
-                  backgroundImage ? 'border-green-300' : 'border-gray-300 hover:border-purple-300'
-                } transition-colors cursor-pointer`}
-                onClick={() => document.getElementById('background-upload')?.click()}
-              >
-                {backgroundImage ? (
-                  <div className="relative">
-                    <img 
-                      src={backgroundImage} 
-                      alt="Existing" 
-                      className="mx-auto max-h-40 rounded"
-                    />
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded">
-                      <p className="text-white text-sm">Change Image</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="py-4">
-                    <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-gray-500">Click to upload an existing image</p>
-                  </div>
-                )}
-                <input 
-                  type="file" 
-                  id="background-upload" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handleBackgroundUpload}
-                />
-              </div>
-            </div>
-            
-            <div className="mb-6">
               <p className="text-sm text-gray-600 mb-2">Person Image</p>
               <div 
                 className={`border-2 border-dashed rounded-lg p-4 text-center ${
@@ -244,7 +209,8 @@ const Create = () => {
                 ) : (
                   <div className="py-4">
                     <ImagePlus className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-gray-500">Click to upload a person image</p>
+                    <p className="text-gray-500">Click to upload the person to add</p>
+                    <p className="text-xs text-gray-400 mt-1">Choose an image with a clear view of the person</p>
                   </div>
                 )}
                 <input 
@@ -253,6 +219,42 @@ const Create = () => {
                   className="hidden" 
                   accept="image/*"
                   onChange={handlePersonUpload}
+                />
+              </div>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-sm text-gray-600 mb-2">Existing Image</p>
+              <div 
+                className={`border-2 border-dashed rounded-lg p-4 text-center ${
+                  backgroundImage ? 'border-green-300' : 'border-gray-300 hover:border-purple-300'
+                } transition-colors cursor-pointer`}
+                onClick={() => document.getElementById('background-upload')?.click()}
+              >
+                {backgroundImage ? (
+                  <div className="relative">
+                    <img 
+                      src={backgroundImage} 
+                      alt="Existing" 
+                      className="mx-auto max-h-40 rounded"
+                    />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded">
+                      <p className="text-white text-sm">Change Image</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-4">
+                    <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-gray-500">Click to upload the group photo or scene</p>
+                    <p className="text-xs text-gray-400 mt-1">Choose the image where you want to add the person</p>
+                  </div>
+                )}
+                <input 
+                  type="file" 
+                  id="background-upload" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleBackgroundUpload}
                 />
               </div>
             </div>
